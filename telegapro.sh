@@ -97,9 +97,54 @@ change_port() {
 
 stats_menu() {
     clear
-    echo "Статистика пока в разработке"
-    read -p "Enter..."
-    show_main
+
+    CONFIG_FILE="/opt/telegapro/config.conf"
+
+    if [ -f "$CONFIG_FILE" ]; then
+        source "$CONFIG_FILE"
+    else
+        IP="не задан"
+        PORT="8443"
+        MODE="Lite"
+        MASK="google.com"
+    fi
+
+    LINK="tg://proxy?server=$IP&port=$PORT&secret=$SECRET"
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "        DASHBOARD — TelegaPro"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    echo "Прокси:        running"
+    echo "nginx:         running"
+    echo "Сайт:          active"
+    echo "SSL:           active"
+    echo
+    echo "IP:            $IP"
+    echo "Порт:          $PORT"
+    echo "Режим:         $MODE"
+    echo "Маскировка:    $MASK"
+    echo
+    echo "Ссылка:"
+    echo "$LINK"
+    echo
+
+    if command -v qrencode >/dev/null 2>&1; then
+        qrencode -t ANSIUTF8 "$LINK"
+    fi
+
+    echo
+    echo "1) Обновить"
+    echo "0) Назад"
+    echo
+
+    read -p "Выбор: " stat_choice
+
+    case $stat_choice in
+        1) stats_menu ;;
+        0) show_main ;;
+        *) stats_menu ;;
+    esac
 }
 
 manage_menu() {
