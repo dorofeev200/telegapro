@@ -102,9 +102,28 @@ stats_menu() {
 
 manage_menu() {
     clear
-    echo "Управление пока в разработке"
-    read -p "Enter..."
-    show_main
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "         УПРАВЛЕНИЕ — TelegaPro"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    echo "1) Перезапустить прокси"
+    echo "2) Изменить порт"
+    echo "3) Сменить режим Lite / Pro"
+    echo "4) Показать конфиг"
+    echo "0) Назад"
+    echo
+
+    read -p "Выбор: " manage_choice
+
+    case $manage_choice in
+        1) restart_proxy ;;
+        2) change_port ;;
+        3) change_mode ;;
+        4) show_config ;;
+        0) show_main ;;
+        *) manage_menu ;;
+    esac
 }
 
 bot_menu() {
