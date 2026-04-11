@@ -71,7 +71,18 @@ install_lite() {
     echo "Режим: Lite"
     echo
 
-    read -p "Установить прокси? [Y/n]: " CONFIRM
+   read -p "Установить прокси? [Y/n]: " CONFIRM
+
+    IP=$(curl -s ifconfig.me || echo "не определен")
+    SECRET=$(openssl rand -hex 16)
+
+    cat > "$CONFIG_FILE" << EOF
+    IP=$IP
+    PORT=$PORT
+    MODE=Lite
+    MASK=$MASK
+    SECRET=$SECRET
+    EOF
 
     echo
     echo "Установка MTProxy..."
