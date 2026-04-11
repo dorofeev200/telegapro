@@ -91,6 +91,7 @@ install_lite() {
     echo
 
     read -p "Нажмите Enter..."
+    bash /opt/telegapro/telegapro.sh
 }
 
 install_pro() {
@@ -132,6 +133,7 @@ install_pro() {
     echo
 
     read -p "Нажмите Enter..."
+    bash /opt/telegapro/telegapro.sh
 }
 
 show_mode_menu
