@@ -1,5 +1,10 @@
 #!/bin/bash
 
+APP_DIR="/opt/telegapro"
+CONFIG_FILE="$APP_DIR/config.conf"
+
+mkdir -p "$APP_DIR"
+
 show_mode_menu() {
     clear
     echo "======================================"
