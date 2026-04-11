@@ -133,4 +133,45 @@ bot_menu() {
     show_main
 }
 
+restart_proxy() {
+    clear
+    echo "Перезапуск TelegaPro..."
+    sleep 1
+    echo "✔ Прокси перезапущен"
+    sleep 1
+    manage_menu
+}
+
+change_mode() {
+    clear
+    echo "Выберите режим:"
+    echo "1) Lite"
+    echo "2) Pro"
+    echo
+
+    read -p "Выбор: " MODE_CHOICE
+
+    case $MODE_CHOICE in
+        1) NEW_MODE="Lite" ;;
+        2) NEW_MODE="Pro" ;;
+        *) NEW_MODE="Lite" ;;
+    esac
+
+    sed -i "s/^MODE=.*/MODE=$NEW_MODE/" /opt/telegapro/config.conf
+
+    echo "✔ Режим изменен на $NEW_MODE"
+    sleep 1
+    manage_menu
+}
+
+show_config() {
+    clear
+    echo "Текущий конфиг:"
+    echo
+    cat /opt/telegapro/config.conf
+    echo
+    read -p "Enter..."
+    manage_menu
+}
+
 show_main
