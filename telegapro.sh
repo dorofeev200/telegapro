@@ -175,9 +175,60 @@ manage_menu() {
 
 bot_menu() {
     clear
-    echo "Telegram-бот пока в разработке"
-    read -p "Enter..."
-    show_main
+
+    CONFIG_FILE="/opt/telegapro/config.conf"
+
+    if [ -f "$CONFIG_FILE" ]; then
+        source "$CONFIG_FILE"
+    else
+        echo "Конфиг не найден"
+        read -p "Enter..."
+        show_main
+        return
+    fi
+
+    LINK="tg://proxy?server=$IP&port=$PORT&secret=$SECRET"
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "       TELEGRAM-БОТ — TelegaPro"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    echo "1) Показать ссылку"
+    echo "2) Настроить токен бота"
+    echo "3) Сгенерировать текст для выдачи"
+    echo "0) Назад"
+    echo
+
+    read -p "Выбор: " bot_choice
+
+    case $bot_choice in
+        1)
+            echo
+            echo "$LINK"
+            echo
+            read -p "Enter..."
+            bot_menu
+            ;;
+        2)
+            read -p "Введите токен бота: " BOT_TOKEN
+            echo "BOT_TOKEN=$BOT_TOKEN" >> "$CONFIG_FILE"
+            echo "✔ Токен сохранен"
+            sleep 1
+            bot_menu
+            ;;
+        3)
+            clear
+            echo "Текст для клиента:"
+            echo
+            echo "Ваш доступ к TelegaPro:"
+            echo "$LINK"
+            echo
+            read -p "Enter..."
+            bot_menu
+            ;;
+        0) show_main ;;
+        *) bot_menu ;;
+    esac
 }
 
 restart_proxy() {
