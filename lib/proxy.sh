@@ -6,7 +6,7 @@ proxy_menu() {
     fi
 
     LINK="tg://proxy?server=$IP&port=$PORT&secret=$SECRET"
-
+    echo "$LINK" > /opt/telegapro/client_link.txt
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "           ПРОКСИ — TelegaPro"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
