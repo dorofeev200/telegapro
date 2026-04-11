@@ -8,19 +8,21 @@ show_main() {
     echo "1) Прокси"
     echo "2) Статистика"
     echo "3) Управление"
-    echo "4) Telegram-бот"
+    echo "4) Сайт / Шаблоны"
+    echo "5) Telegram-бот"
     echo "0) Выход"
     echo
     read -p "Выбор: " choice
 
-    case $choice in
-        1) proxy_menu ;;
-        2) stats_menu ;;
-        3) manage_menu ;;
-        4) bot_menu ;;
-        0) exit ;;
-        *) show_main ;;
-    esac
+case $choice in
+    1) proxy_menu ;;
+    2) stats_menu ;;
+    3) manage_menu ;;
+    4) website_menu ;;
+    5) bot_menu ;;
+    0) exit ;;
+    *) show_main ;;
+esac
 }
 
 proxy_menu() {
@@ -172,6 +174,84 @@ show_config() {
     echo
     read -p "Enter..."
     manage_menu
+}
+
+website_menu() {
+    clear
+
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "       САЙТ / ШАБЛОНЫ — TelegaPro"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo
+    echo "1) Установить Lite шаблон"
+    echo "2) Установить Pro сайт"
+    echo "3) Каталог шаблонов"
+    echo "0) Назад"
+    echo
+
+    read -p "Выбор: " web_choice
+
+    case $web_choice in
+        1) install_lite_site ;;
+        2) install_pro_site ;;
+        3) templates_catalog ;;
+        0) show_main ;;
+        *) website_menu ;;
+    esac
+}
+
+install_lite_site() {
+    clear
+    echo "Lite шаблоны:"
+    echo
+    echo "1) Google style"
+    echo "2) GitHub style"
+    echo "3) Cloudflare style"
+    echo
+
+    read -p "Выбор: " tpl
+
+    echo
+    echo "✔ Lite шаблон установлен"
+    sleep 1
+
+    website_menu
+}
+
+install_pro_site() {
+    clear
+    read -p "Введите домен: " DOMAIN
+
+    echo
+    echo "Категории:"
+    echo "1) Бизнес"
+    echo "2) Магазины"
+    echo "3) IT"
+    echo "4) Блоги"
+    echo
+
+    read -p "Выбор категории: " CAT
+
+    echo
+    echo "✔ Pro сайт установлен на $DOMAIN"
+    sleep 1
+
+    website_menu
+}
+
+templates_catalog() {
+    clear
+    echo "Каталог шаблонов"
+    echo
+    echo "• Бизнес"
+    echo "• Магазины"
+    echo "• Технологии"
+    echo "• Блоги"
+    echo "• Landing pages"
+    echo
+
+    read -p "Enter..."
+    website_menu
 }
 
 show_main
