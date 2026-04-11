@@ -2,7 +2,36 @@
 
 CONFIG_FILE="/opt/telegapro/config.conf"
 
+source /opt/telegapro/lib/proxy.sh
+source /opt/telegapro/lib/stats.sh
+source /opt/telegapro/lib/website.sh
+source /opt/telegapro/lib/bot.sh
+source /opt/telegapro/lib/manage.sh
+
 show_main() {
+    clear
+    echo "========== TelegaPro =========="
+    echo "1) Прокси"
+    echo "2) Статистика"
+    echo "3) Управление"
+    echo "4) Сайт / Шаблоны"
+    echo "5) Telegram-бот"
+    echo "0) Выход"
+    echo
+    read -p "Выбор: " choice
+
+    case $choice in
+        1) proxy_menu ;;
+        2) stats_menu ;;
+        3) manage_menu ;;
+        4) website_menu ;;
+        5) bot_menu ;;
+        0) exit ;;
+        *) show_main ;;
+    esac
+}
+
+show_main
     clear
     echo "========== TelegaPro =========="
     echo "1) Прокси"
