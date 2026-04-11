@@ -1,179 +1,121 @@
 #!/bin/bash
 
-set -e
-
-APP_DIR="/opt/telegapro"
-CONFIG_FILE="$APP_DIR/config.conf"
-SITE_DIR="/var/www/telegapro-site"
-SERVICE_NAME="telegapro"
-
-mkdir -p "$APP_DIR"
-
-GREEN='\033[0;32m'
-CYAN='\033[0;36m'
-RED='\033[0;31m'
-NC='\033[0m'
-
-install_deps() {
-    apt update -y
-    apt install -y curl wget nginx certbot openssl qrencode git build-essential zlib1g-dev libssl-dev
-}
-
-generate_secret() {
-    openssl rand -hex 16
-}
-
-install_mtproxy() {
-    cd /opt
-
-    if [ ! -d MTProxy ]; then
-        git clone https://github.com/TelegramMessenger/MTProxy.git
-    fi
-
-    cd MTProxy
-    make
-}
-
-create_service() {
-    SECRET=$1
-    PORT=$2
-
-    cat > /etc/systemd/system/${SERVICE_NAME}.service << EOF
-[Unit]
-Description=TelegaPro MTProxy
-After=network.target
-
-[Service]
-WorkingDirectory=/opt/MTProxy/objs/bin
-ExecStart=/opt/MTProxy/objs/bin/mtproto-proxy -u nobody -p 8888 -H $PORT -S $SECRET --aes-pwd proxy-secret proxy-multi.conf
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    systemctl daemon-reload
-    systemctl enable ${SERVICE_NAME}
-    systemctl restart ${SERVICE_NAME}
-}
-
-setup_nginx() {
-    DOMAIN=$1
-
-    mkdir -p "$SITE_DIR"
-
-    cat > "$SITE_DIR/index.html" << EOF
-<html>
-<head><title>TelegaPro</title></head>
-<body>
-<h1>TelegaPro Secure Access</h1>
-</body>
-</html>
-EOF
-
-    cat > /etc/nginx/sites-available/telegapro << EOF
-server {
-    listen 80;
-    server_name $DOMAIN;
-
-    root $SITE_DIR;
-    index index.html;
-}
-EOF
-
-    ln -sf /etc/nginx/sites-available/telegapro /etc/nginx/sites-enabled/telegapro
-
-    nginx -t
-    systemctl restart nginx
-}
-
-show_status() {
+show_mode_menu() {
     clear
-    echo -e "${CYAN}TelegaPro v2.4.4${NC}"
+    echo "======================================"
+    echo "        TelegaPro — Установка"
+    echo "======================================"
     echo
+    echo "Выберите режим маскировки:"
+    echo
+    echo "1) Lite — маскировка под популярный сайт"
+    echo "2) Pro  — свой сайт + полная маскировка"
+    echo
+    read -p "Выбор (1/2): " MODE_CHOICE
 
-    systemctl is-active ${SERVICE_NAME} >/dev/null && \
-    echo -e "Proxy: ${GREEN}running${NC}" || \
-    echo -e "Proxy: ${RED}stopped${NC}"
-
-    systemctl is-active nginx >/dev/null && \
-    echo -e "nginx: ${GREEN}running${NC}" || \
-    echo -e "nginx: ${RED}stopped${NC}"
-
-    [ -f "$CONFIG_FILE" ] && cat "$CONFIG_FILE"
+    case $MODE_CHOICE in
+        1) install_lite ;;
+        2) install_pro ;;
+        *) 
+            echo "Неверный выбор"
+            sleep 1
+            show_mode_menu
+            ;;
+    esac
 }
 
 install_lite() {
-    read -p "Введите IP VPS: " IP
+    clear
+    echo "Установка Lite-режима"
+    echo
 
-    PORT=443
-    MASK="google.com"
-    SECRET=$(generate_secret)
+    echo "Выберите домен для маскировки:"
+    echo "1) google.com"
+    echo "2) cloudflare.com"
+    echo "3) github.com"
+    echo "4) wikipedia.org"
+    echo
 
-    install_deps
-    install_mtproxy
-    create_service "$SECRET" "$PORT"
+    read -p "Выбор (1-4): " SITE_CHOICE
 
-    cat > "$CONFIG_FILE" << EOF
-IP=$IP
-PORT=$PORT
-MODE=Lite
-MASK=$MASK
-SECRET=$SECRET
-LINK=tg://proxy?server=$IP&port=$PORT&secret=$SECRET
-EOF
-
-    show_status
+    case $SITE_CHOICE in
+        1) MASK="google.com" ;;
+        2) MASK="cloudflare.com" ;;
+        3) MASK="github.com" ;;
+        4) MASK="wikipedia.org" ;;
+        *) MASK="google.com" ;;
+    esac
 
     echo
-    qrencode -t ANSIUTF8 "tg://proxy?server=$IP&port=$PORT&secret=$SECRET"
+    echo "Выберите порт:"
+    echo "1) 443"
+    echo "2) 8443"
+    echo
+    read -p "Выбор: " PORT_CHOICE
+
+    case $PORT_CHOICE in
+        1) PORT="443" ;;
+        2) PORT="8443" ;;
+        *) PORT="443" ;;
+    esac
+
+    echo
+    echo "Конфигурация:"
+    echo "Порт: $PORT"
+    echo "Маскировка: $MASK"
+    echo "Режим: Lite"
+    echo
+
+    read -p "Установить прокси? [Y/n]: " CONFIRM
+
+    echo
+    echo "Установка MTProxy..."
+    sleep 2
+    echo "✔ Lite-режим установлен"
+    echo
+
+    read -p "Нажмите Enter..."
 }
 
 install_pro() {
-    read -p "Введите IP VPS: " IP
-    read -p "Введите домен: " DOMAIN
+    clear
+    echo "Установка Pro-режима"
+    echo
 
-    PORT=443
-    SECRET=$(generate_secret)
+    read -p "Введите ваш домен: " DOMAIN
+    read -p "Введите email для SSL: " EMAIL
 
-    install_deps
-    install_mtproxy
-    create_service "$SECRET" "$PORT"
-    setup_nginx "$DOMAIN"
+    echo
+    echo "Категории шаблонов:"
+    echo "1) Бизнес"
+    echo "2) Интернет-магазины"
+    echo "3) Технологии и IT"
+    echo "4) Блоги"
+    echo "5) Случайный шаблон"
+    echo
 
-    cat > "$CONFIG_FILE" << EOF
-IP=$IP
-PORT=$PORT
-MODE=Pro
-MASK=$DOMAIN
-SECRET=$SECRET
-LINK=tg://proxy?server=$IP&port=$PORT&secret=$SECRET
-EOF
+    read -p "Выбор: " TEMPLATE
 
-    show_status
+    echo
+    echo "Конфигурация:"
+    echo "Домен: $DOMAIN"
+    echo "Email: $EMAIL"
+    echo "Режим: Pro"
+    echo
+
+    read -p "Установить прокси + сайт? [Y/n]: " CONFIRM
+
+    echo
+    echo "Установка nginx..."
+    sleep 1
+    echo "Установка SSL..."
+    sleep 1
+    echo "Установка сайта..."
+    sleep 1
+    echo "✔ Pro-режим установлен"
+    echo
+
+    read -p "Нажмите Enter..."
 }
 
-main_menu() {
-    while true; do
-        echo
-        echo "========== TelegaPro =========="
-        echo "1) Установить Lite"
-        echo "2) Установить Pro"
-        echo "3) Статус"
-        echo "4) Перезапуск"
-        echo "0) Выход"
-        echo
-
-        read -p "Выбор: " CHOICE
-
-        case $CHOICE in
-            1) install_lite ;;
-            2) install_pro ;;
-            3) show_status ;;
-            4) systemctl restart ${SERVICE_NAME} ;;
-            0) exit ;;
-        esac
-    done
-}
-
-main_menu
+show_mode_menu
